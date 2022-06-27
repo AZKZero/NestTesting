@@ -11,6 +11,8 @@ export class OpListController {
     private opModel: Model<OperatorDocument>,
   ) {}
 
+  R6 = require('r6s-stats-api');
+
   private readonly operators = [
     r6operators.sledge,
     r6operators.thatcher,
@@ -169,5 +171,14 @@ export class OpListController {
       ...this.operators.find((value) => value.id === operatorId),
       png: `https://r6operators.marcopixel.eu/icons/png/${operatorId}.png`,
     };
+  }
+
+  @Get('operator_stats')
+  async getOperatorStats(
+    @Query('op_id') operatorId: string,
+    @Query('platform') platform: string,
+    @Query('uname') username: string,
+  ) {
+    return await this.R6.operator(platform, username, operatorId);
   }
 }
