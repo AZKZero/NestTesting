@@ -3,6 +3,7 @@ import { OperatorDocument, R6Operator } from './schemas/operators.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import r6operators from 'r6operators';
+import { StatsOperator } from 'r6s-stats-api/types/operator';
 @Controller('op-list')
 export class OpListController {
   private readonly logger = new Logger(OpListController.name);
@@ -164,6 +165,19 @@ export class OpListController {
         })),
     };
   }
+  @Get('listAll')
+  async getAllOperators() {
+    return {
+      data: this.operators.map((value) => ({
+        id: value.id,
+        name: value.name,
+        bio: value.bio,
+        role: value.role,
+        unit: value.unit,
+        png: `https://r6operators.marcopixel.eu/icons/png/${value.id}.png`,
+      })),
+    };
+  }
 
   @Get('operator_det')
   async getOperatorDetails(@Query('op_id') operatorId: string) {
@@ -179,6 +193,34 @@ export class OpListController {
     @Query('platform') platform: string,
     @Query('uname') username: string,
   ) {
-    return await this.R6.operator(platform, username, operatorId);
+    let response;
+    try {
+      response = await this.R6.operator(platform, username, operatorId);
+      this.logger.log(response);
+    } catch (e) {
+      const gen = await this.R6.general(platform, username);
+      response = {
+        url: `https://r6.tracker.network/profile/${platform}/${username}/operators`,
+        name: username,
+        header: gen.header,
+        operator: operatorId,
+        time_played: '0h 0m',
+        kills: '0',
+        deaths: '0',
+        kd: '0.0',
+        wins: '0',
+        losses: '0',
+        win_: '0%',
+        headshots_: '0%',
+        dbnos: '0',
+        xp: '0',
+        melee_kills: '0',
+        operator_stat: '0',
+        operator_img: '0',
+      };
+      this.logger.error(e);
+    } finally {
+      return response;
+    }
   }
 }
