@@ -46,6 +46,7 @@ export class OpListController {
     r6operators.zero,
     r6operators.flores,
     r6operators.osa,
+    r6operators.sens,
     r6operators.smoke,
     r6operators.mute,
     r6operators.castle,
